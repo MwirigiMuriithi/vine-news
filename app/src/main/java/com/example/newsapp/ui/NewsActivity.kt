@@ -1,47 +1,30 @@
 package com.example.newsapp.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.newsapp.ui.theme.NewsAppTheme
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.example.newsapp.db.ArticleDatabase
+import com.example.newsapp.repository.NewsRepository
+import com.example.newsprojectpractice.R
+import com.example.newsprojectpractice.databinding.ActivityNewsBinding
 
-class MainActivity : ComponentActivity() {
+class NewsActivity : AppCompatActivity() {
+    lateinit var newsViewModel: NewsViewModel
+    lateinit var binding: ActivityNewsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            NewsAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
-}
+        binding = ActivityNewsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+        val newsRepository = NewsRepository(ArticleDatabase(this))
+        val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)
+        newsViewModel = ViewModelProvider( this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NewsAppTheme {
-        Greeting("Android")
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        binding.bottomNavigationView.setupWithNavController(navController)
     }
 }
